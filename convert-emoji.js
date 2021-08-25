@@ -94,3 +94,11 @@ emojiPresentationSelectorForce.forEach((code) => {
         }
     });
 });
+
+
+// fix a bug in country flags (an extra flag founded that belongs to no country in the world)!
+unlinkSync(path.join(normalFolder, '1f1ee-1f1f1.png'))
+copyFileSync(path.join(normalFolder, '1f1f5-1f1f8.png'), path.join(normalFolder, '1f1ee-1f1f1.png'))
+
+unlinkSync(path.join(hqFolder, '1f1ee-1f1f1.png'))
+copyFileSync(path.join(hqFolder, '1f1f5-1f1f8.png'), path.join(hqFolder, '1f1ee-1f1f1.png'))
