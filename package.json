@@ -1,7 +1,7 @@
 {
   "name": "emoji-data-ios",
-  "version": "0.0.2",
-  "description": "Emoji data and images for Telegram-T",
+  "version": "0.5.1",
+  "description": "Emoji data and images for Telegram Web A",
   "main": "emoji-data.json",
   "scripts": {
     "build": "node convert-emoji.js"
@@ -18,5 +18,6 @@
   "bugs": {
     "url": "https://github.com/korenskoy/emoji-data-ios/issues"
   },
-  "homepage": "https://github.com/korenskoy/emoji-data-ios"
+  "homepage": "https://github.com/korenskoy/emoji-data-ios",
+  "devDependencies": {}
 }

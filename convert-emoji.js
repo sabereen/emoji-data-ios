@@ -4,6 +4,13 @@ const initialData = require('./initial-data.json');
 const data = require('./emoji.json').filter(emoji => {
     return initialData.categoryId[emoji.category] !== undefined || !emoji.has_img_apple
 });
+const normalFolder = './img-apple-64';
+const hqFolder = './img-apple-160';
+const vs16RegExp = /-fe0f/g;
+const {
+    access, constants, copyFileSync, readdirSync,
+} = fs;
+
 const emojiPresentationSelectorForce = [
     '0023', '002a', '0030', '0031', '0032', '0033', '0034', '0035', '0036', '0037', '0038', '0039', '00a9', '00ae',
     '203c', '2049', '2122', '2139', '2194', '2195', '2196', '2197', '2198', '2199', '21a9', '21aa', '231a', '231b',
@@ -34,6 +41,16 @@ const emojiPresentationSelectorForce = [
     '1f6e5', '1f6e9', '1f6f0', '1f6f3',
 ];
 
+const blockList = new Set([
+    'man-woman-girl', 'man-woman-boy-boy', 'man-woman-girl-girl', 'man-man-boy', 'man-man-girl', 'man-man-girl-boy',
+    'man-man-boy-boy', 'man-man-girl-girl', 'woman-woman-boy', 'woman-woman-girl', 'woman-woman-girl-boy',
+    'woman-woman-boy-boy', 'woman-woman-girl-girl', 'man-boy', 'man-boy-boy', 'man-girl', 'man-girl-boy',
+    'man-girl-girl', 'woman-boy-boy', 'woman-girl', 'woman-girl-girl', 'family', 'family_adult_adult_child',
+    'family_adult_adult_child_child', 'family_adult_child', 'family_adult_child_child'
+])
+
+const addPresentationSelector = ['26a1'];
+
 data.sort((a, b) => {
     const as = initialData.categoryId[a.category].position;
     const bs = initialData.categoryId[b.category].position;
@@ -46,6 +63,8 @@ data.sort((a, b) => {
 });
 
 const emojis = data.reduce((result, emoji) => {
+    if (blockList.has(emoji.short_name)) return result;
+
     const categoryUid = emoji.category;
 
     if (!result.categoryId[categoryUid]) {
@@ -62,14 +81,11 @@ const emojis = data.reduce((result, emoji) => {
 delete emojis.categoryId;
 
 const json = emojis.categories.reduce((result, category) => {
-    result.push([category.id, category.name]);
+    result.push([category.id, [category.name]]);
     result.push(category.emojis.map((id) => {
         const emoji = emojis.emojis[id];
 
-        return [
-            emoji.unified,
-            emoji.short_name,
-        ];
+        return [emoji.unified, emoji.short_names];
     }));
 
     return result;
@@ -84,18 +100,42 @@ fs.writeFile('emoji-data.json', JSON.stringify(json), 'utf8', (err) => {
 });
 
 emojiPresentationSelectorForce.forEach((code) => {
-    fs.exists(`./img-apple-64/${code}-fe0f.png`, (exists) => {
-        if (exists) {
-            fs.copyFileSync(`./img-apple-64/${code}-fe0f.png`, `./img-apple-64/${code}.png`);
+    access(`./img-apple-64/${code}-fe0f.png`, constants.F_OK | constants.W_OK, (err) => {
+        if (!err) {
+            copyFileSync(`./img-apple-64/${code}-fe0f.png`, `./img-apple-64/${code}.png`);
         }
     });
-    fs.exists(`./img-apple-160/${code}-fe0f.png`, (exists) => {
-        if (exists) {
-            fs.copyFileSync(`./img-apple-160/${code}-fe0f.png`, `./img-apple-160/${code}.png`);
+    access(`./img-apple-160/${code}-fe0f.png`, constants.F_OK | constants.W_OK, (err) => {
+        if (!err) {
+            copyFileSync(`./img-apple-160/${code}-fe0f.png`, `./img-apple-160/${code}.png`);
         }
     });
 });
 
+addPresentationSelector.forEach((code) => {
+    access(`./img-apple-64/${code}.png`, constants.F_OK | constants.W_OK, (err) => {
+        if (!err) {
+            copyFileSync(`./img-apple-64/${code}.png`, `./img-apple-64/${code}-fe0f.png`);
+        }
+    });
+    access(`./img-apple-160/${code}.png`, constants.F_OK | constants.W_OK, (err) => {
+        if (!err) {
+            copyFileSync(`./img-apple-160/${code}.png`, `./img-apple-160/${code}-fe0f.png`);
+        }
+    });
+});
+
+readdirSync(normalFolder).forEach(file => {
+    if (file.match(vs16RegExp) !== null) {
+        copyFileSync(`${normalFolder}/${file}`, `${normalFolder}/${file.replace(vs16RegExp, '')}`);
+    }
+});
+
+readdirSync(hqFolder).forEach(file => {
+    if (file.match(vs16RegExp)) {
+        copyFileSync(`${hqFolder}/${file}`, `${hqFolder}/${file.replace(vs16RegExp, '')}`);
+    }
+});
 
 // fix a bug in country flags (an extra flag founded that belongs to no country in the world)!
 fs.copyFileSync('./img-apple-160/1f1f5-1f1f8.png', './img-apple-160/1f1ee-1f1f1.png')
