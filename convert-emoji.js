@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const initialData = require('./initial-data.json');
 const data = require('./emoji.json').filter(emoji => {
     return initialData.categoryId[emoji.category] !== undefined || !emoji.has_img_apple
