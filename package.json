@@ -1,11 +1,17 @@
 {
-  "name": "emoji-data-ios",
+  "name": "@microblog/emoji-data-ios",
   "version": "0.5.1",
   "description": "Emoji data and images for Telegram Web A",
   "main": "emoji-data.json",
   "scripts": {
-    "build": "node convert-emoji.js"
+    "build": "node convert-emoji.js",
+    "prepublish": "npm run build"
   },
+  "files": [
+    "*.json",
+    "img-apple-64/**",
+    "img-apple-160/**"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/korenskoy/emoji-data-ios.git"
